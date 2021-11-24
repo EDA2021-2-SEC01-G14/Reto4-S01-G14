@@ -1,4 +1,4 @@
-﻿"""
+"""
  * Copyright 2020, Departamento de sistemas y Computación,
  * Universidad de Los Andes
  *
@@ -28,22 +28,107 @@
 import config as cf
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
+from DISClib.ADT import graph 
 from DISClib.DataStructures import mapentry as me
 from DISClib.Algorithms.Sorting import shellsort as sa
 assert cf
 
-"""
-Se define la estructura de un catálogo de videos. El catálogo tendrá dos listas, una para los videos, otra para las categorias de
-los mismos.
-"""
 
 # Construccion de modelos
 
+def NewCatalog():
+
+    catalog = { "AirportDirigido" : None,
+                "Airport2" : None,
+                "routesDirigido" : graph.newGraph(directed=True, size=10000),
+                "routesNodirigido": graph.newGraph(size=3000),
+                "MapHelp" : mp.newMap(10000,maptype="PROBING"),
+                "MapRoutes" : mp.newMap(50000,maptype="PROBING"),
+                "City": mp.newMap(41002,maptype="PROBING"),
+                "addCity" : None,
+                "MapGraph" : mp.newMap(10000,maptype="PROBING")
+                
+
+    }
+
+    return catalog
+
 # Funciones para agregar informacion al catalogo
+
+def addAirport(catalog, airport):
+
+    a = catalog["MapHelp"]
+    name = airport["IATA"]
+    if not mp.contains(a,name):
+        mp.put(a, name, airport)
+
+
+def addRoute(catalog, route):
+
+    dp = route["Departure"]
+    dt = route["Destination"]
+
+    route1 = catalog["routesDirigido"]
+    route2 = catalog["routesNodirigido"]
+
+    routes = tuple(sorted((dp, dt)))
+
+    if not mp.contains(catalog["MapRoutes"], (dp, dt)):
+        if graph.containsVertex(route1, dp) and graph.containsVertex(route1, dt):
+            graph.addEdge(route1,dp, dt, route["distance_km"])
+        elif not graph.containsVertex(route1, dp) and not graph.containsVertex(route1, dt):
+            graph.insertVertex(route1, dp)
+            graph.insertVertex(route1, dt)
+            graph.addEdge(route1, dp, dt, route["distance_km"])
+        elif not graph.containsVertex(route1, dp):
+            graph.insertVertex(route1, dp)
+            graph.addEdge(route1, dp, dt, route["distance_km"])
+        else:
+            graph.insertVertex(route1, dt)
+            graph.addEdge(route1, dp, dt, route["distance_km"])
+        
+        if catalog["AirportDirigido"] is None:
+            catalog["AirportDirigido"] = dp
+        mp.put(catalog["MapRoutes"], (dp, dt), None)
+
+    if mp.contains(catalog["MapRoutes"], (dt, dp)) and not mp.contains(catalog["MapGraph"], routes):
+        
+        if graph.containsVertex(route2, dp) and graph.containsVertex(route2, dt):
+            graph.addEdge(route2,dp, dt, route["distance_km"])
+        elif not graph.containsVertex(route2, dp) and not graph.containsVertex(route2, dt):
+            graph.insertVertex(route2, dp)
+            graph.insertVertex(route2, dt)
+            graph.addEdge(route2, dp, dt, route["distance_km"])
+        elif not graph.containsVertex(route2, dp):
+            graph.insertVertex(route2, dp)
+            graph.addEdge(route2, dp, dt, route["distance_km"])
+        else:
+            graph.insertVertex(route2, dt)
+            graph.addEdge(route2, dp, dt, route["distance_km"])
+        
+        if catalog["Airport2"] is None:
+            catalog["Airport2"] = dp
+        mp.put(catalog["MapGraph"], routes, None)
+
+def addCity(catalog, city):
+    name = city["city_ascii"]
+    catalog["addCity"] = city
+    mp.put(catalog["City"], name, city)
 
 # Funciones para creacion de datos
 
 # Funciones de consulta
+def getData(catalog):
+    
+    resultado = {}
+    resultado["primero1"] = me.getValue(mp.get(catalog["MapHelp"], catalog["AirportDirigido"]))
+    resultado["primero2"] = me.getValue(mp.get(catalog["MapHelp"], catalog["Airport2"]))
+    resultado["aeropuertos1"] =lt.size(graph.vertices(catalog["routesDirigido"]))
+    resultado["aeropuertos2"] =  lt.size(graph.vertices(catalog["routesNodirigido"]))
+    resultado["ciudades"]=mp.size(catalog["City"])
+    resultado["ciudad"] =catalog["addCity"]
+
+    return resultado
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 

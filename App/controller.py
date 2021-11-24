@@ -1,4 +1,4 @@
-﻿"""
+"""
  * Copyright 2020, Departamento de sistemas y Computación,
  * Universidad de Los Andes
  *
@@ -25,14 +25,38 @@ import model
 import csv
 
 
-"""
-El controlador se encarga de mediar entre la vista y el modelo.
-"""
-
 # Inicialización del Catálogo de libros
 
+def NewCatalog():
+    return model.NewCatalog()
+
 # Funciones para la carga de datos
+
+def loadData(catalog):
+
+    file = cf.data_dir + "airports_full.csv"
+    airports = csv.DictReader(open(file, encoding="utf-8"), delimiter=",")
+
+    for airport in airports:
+        model.addAirport(catalog, airport)
+
+
+    file = cf.data_dir + "routes_full.csv"
+    routes = csv.DictReader(open(file, encoding="utf-8"), delimiter=",")
+
+    for route in routes:
+        model.addRoute(catalog, route)
+
+    file = cf.data_dir + "worldcities.csv"
+    cities = csv.DictReader(open(file, encoding="utf-8"), delimiter=",")
+
+    for city in cities:
+        model.addCity(catalog, city)
+
 
 # Funciones de ordenamiento
 
 # Funciones de consulta sobre el catálogo
+
+def getData(catalog):
+    return model.getData(catalog)
