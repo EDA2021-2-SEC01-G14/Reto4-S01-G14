@@ -29,6 +29,8 @@ import config as cf
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
 from DISClib.ADT import graph 
+from DISClib.Algorithms.Graphs import scc
+from DISClib.Algorithms.Graphs import dijsktra as djk
 from DISClib.DataStructures import mapentry as me
 from DISClib.Algorithms.Sorting import shellsort as sa
 assert cf
@@ -40,16 +42,14 @@ def NewCatalog():
 
     catalog = { "AirportDirigido" : None,
                 "Airport2" : None,
-                "routesDirigido" : graph.newGraph(directed=True, size=10000),
+                "routesDirigido": graph.newGraph(directed=True, size=10000),
                 "routesNodirigido": graph.newGraph(size=3000),
                 "MapHelp" : mp.newMap(10000,maptype="PROBING"),
                 "MapRoutes" : mp.newMap(50000,maptype="PROBING"),
                 "City": mp.newMap(41002,maptype="PROBING"),
                 "addCity" : None,
                 "MapGraph" : mp.newMap(10000,maptype="PROBING")
-                
-
-    }
+                }
 
     return catalog
 
@@ -126,9 +126,49 @@ def getData(catalog):
     resultado["aeropuertos1"] =lt.size(graph.vertices(catalog["routesDirigido"]))
     resultado["aeropuertos2"] =  lt.size(graph.vertices(catalog["routesNodirigido"]))
     resultado["ciudades"]=mp.size(catalog["City"])
-    resultado["ciudad"] =catalog["addCity"]
+    resultado["ciudad"] = catalog["addCity"]
 
     return resultado
+
+
+##### REQ 2 #####
+
+def findclust(catalog, IATA1, IATA2):
+
+    catalog['routesDirigido']
+
+    SCC = scc.KosarajuSCC(catalog['routesDirigido'])
+
+    Components=scc.connectedComponents(SCC)
+   
+    Conect=scc.stronglyConnected(SCC,IATA1,IATA2)
+
+    return Components, Conect
+
+    
+##### REQ 4 #####
+
+def traveller(catalog,milles,Departure):
+
+
+    return
+
+##### REQ 4 #####
+
+def traveller(catalog,milles,Departure):
+
+    kms=float(milles)*1.6/2
+
+    search=djk.Dijkstra(catalog['routesNodirigido'],Departure)
+
+    return
+
+##### REQ 5 #####
+
+
+
+##### REQ 6 #####
+
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 

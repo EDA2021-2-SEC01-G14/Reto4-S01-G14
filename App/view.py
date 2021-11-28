@@ -20,11 +20,15 @@
  * along withthis program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-
+#mport folium 
 import config as cf
 import sys
 import controller
+import threading
 from prettytable import PrettyTable
+from DISClib.ADT import list as lt
+from DISClib.ADT import map as mp
+from DISClib.ADT import graph 
 from DISClib.ADT import list as lt
 assert cf
 
@@ -56,8 +60,21 @@ def printData(Catalogo):
 
     print(printTable3)
 
+def printReq2(rta):
+
+    print('Hay',rta[0],'clústeres presentes en la red de transporte aéreo')
+
+    if rta[1] == True:
+        print('Los dos aeropuertos están en el mismo clúster')
+    else:
+        print('Los dos aeropuertos no están en el mismo clúster')
+
+
+
+
 
 def printMenu():
+    print("------------------------------------------------------")
     print("Bienvenido")
     print("1- Cargar información en el catálogo")
     print("2- Encontrar puntos de interconexión aérea")
@@ -74,42 +91,64 @@ catalog = None
 """
 Menu principal
 """
-while True:
-    printMenu()
-    inputs = input('Seleccione una opción para continuar\n')
+def thread_cycle():
+    while True:
+        printMenu()
+        inputs = input('Seleccione una opción para continuar\n')
 
-    if int(inputs[0]) == 1:
+        if int(inputs[0]) == 1:
 
-        print("Cargando información de los archivos ....")
-        catalog = controller.NewCatalog()
-        controller.loadData(catalog)
-        catalogo = controller.getData(catalog)
-        printData(catalogo)
+            print("Cargando información de los archivos ....")
+            catalog = controller.NewCatalog()
+            controller.loadData(catalog)
+            catalogo = controller.getData(catalog)
+            printData(catalogo)
+
+            #print(graph.degree(catalog['routesDirigido'],'AER'))
+            
+        elif int(inputs[0]) == 2:
+            pass
+
+        elif int(inputs[0]) == 3:
+
+            IATA1=input('Ingrese el Código IATA del aeropuerto 1: ')
+            IATA2=input('Ingrese el Código IATA del aeropuerto 2: ')
+
+            rta=controller.findclust(catalog, IATA1, IATA2)
+
+            printReq2(rta)
+
+            pass
         
-    elif int(inputs[0]) == 2:
-        pass
+        elif int(inputs[0]) == 4:
 
-    elif int(inputs[0]) == 3:
-        pass
-    
-    elif int(inputs[0]) == 4:
-        pass
-    
-    elif int(inputs[0]) == 5:
-        pass
+            DP=input('Ciudad origen: ')
+            DT=input('Ciudad detino: ')
 
-    elif int(inputs[0]) == 6:
-        pass
-    
-    elif int(inputs[0]) == 7:
-        pass
 
-    elif int(inputs[0]) == 8:
-        pass
+            pass
+        
+        elif int(inputs[0]) == 5:
+            pass
 
-    elif int(inputs[0]) == 9:
-        pass
+        elif int(inputs[0]) == 6:
+            pass
+        
+        elif int(inputs[0]) == 7:
+            pass
 
-    else:
-        sys.exit(0)
-sys.exit(0)
+        elif int(inputs[0]) == 8:
+            pass
+
+        elif int(inputs[0]) == 9:
+            pass
+
+        else:
+            sys.exit(0)
+    sys.exit(0)
+
+if __name__ == "__main__":
+    threading.stack_size(67108864)  # 64MB stack
+    sys.setrecursionlimit(2 ** 20)
+    thread = threading.Thread(target=thread_cycle)
+    thread.start()

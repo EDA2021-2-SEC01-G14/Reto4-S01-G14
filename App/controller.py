@@ -53,6 +53,10 @@ def loadData(catalog):
     for city in cities:
         model.addCity(catalog, city)
 
+##### REQ 2 #####
+
+def findclust(catalog, IATA1, IATA2):
+    return model.findclust(catalog, IATA1, IATA2)
 
 # Funciones de ordenamiento
 
