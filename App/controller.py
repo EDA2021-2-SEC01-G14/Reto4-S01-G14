@@ -53,6 +53,11 @@ def loadData(catalog):
     for city in cities:
         model.addCity(catalog, city)
 
+
+##### REQ 1 #####
+def Interconection(catalog):
+    return model.Interconection(catalog)
+
 ##### REQ 2 #####
 
 def findclust(catalog, IATA1, IATA2):

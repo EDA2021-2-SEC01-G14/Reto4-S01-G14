@@ -28,6 +28,7 @@ import threading
 from prettytable import PrettyTable
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
+from DISClib.DataStructures import mapentry as me
 from DISClib.ADT import graph 
 from DISClib.ADT import list as lt
 assert cf
@@ -59,6 +60,30 @@ def printData(Catalogo):
     printTable3.add_row(row)
 
     print(printTable3)
+
+def printReq1(catalog,rta):
+
+    print('__________Digraph__________')
+    print('Número de aeropuertos mas interconectados:',lt.size(rta[0]))
+    print('el (los) aeropuerto(s) mas conexion (Digraph)')
+    TableDi = PrettyTable("IATA,Name,City,Country".split(","))
+    
+    for i in range(1,lt.size(rta[0])+1):
+        airport=lt.getElement(rta[0],i)
+        airport=me.getValue(mp.get(catalog['MapHelp'],airport))
+        TableDi.add_row([airport['IATA'],airport['Name'],airport['City'],airport['Country']])
+    print(TableDi)
+
+    print('__________NoDigraph__________')
+    print('Número de aeropuertos mas interconectados:',lt.size(rta[1]))
+    print('el (los) aeropuerto(s) mas conexion (NoDigraph)')
+    TableNoDi = PrettyTable("IATA,Name,City,Country".split(","))
+    for i in range(1,lt.size(rta[1])+1):
+        airport=lt.getElement(rta[1],i)
+        airport=me.getValue(mp.get(catalog['MapHelp'],airport))
+        TableNoDi.add_row([airport['IATA'],airport['Name'],airport['City'],airport['Country']])
+    print(TableNoDi)
+
 
 def printReq2(rta):
 
@@ -107,6 +132,9 @@ def thread_cycle():
             #print(graph.degree(catalog['routesDirigido'],'AER'))
             
         elif int(inputs[0]) == 2:
+
+            rta=controller.Interconection(catalog)
+            printReq1(catalog,rta)
             pass
 
         elif int(inputs[0]) == 3:

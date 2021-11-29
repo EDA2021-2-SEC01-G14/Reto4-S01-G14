@@ -24,7 +24,8 @@
  * Dario Correal - Version inicial
  """
 
-
+import numpy 
+import math
 import config as cf
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
@@ -54,6 +55,20 @@ def NewCatalog():
     return catalog
 
 # Funciones para agregar informacion al catalogo
+def addtomap(map,key,object):
+
+    if mp.contains(map,key):
+    
+            entry=mp.get(map,key)
+            list=entry['value']
+            lt.addLast(list,object)
+            mp.put(map,key,list)
+            #print(mp.get(catalog['BeginDate'],artist['BeginDate']))
+            
+    else: 
+        list=lt.newList(datastructure='ARRAY_LIST')
+        lt.addLast(list,object)
+        mp.put(map,key,list)
 
 def addAirport(catalog, airport):
 
@@ -61,7 +76,6 @@ def addAirport(catalog, airport):
     name = airport["IATA"]
     if not mp.contains(a,name):
         mp.put(a, name, airport)
-
 
 def addRoute(catalog, route):
 
@@ -113,7 +127,8 @@ def addRoute(catalog, route):
 def addCity(catalog, city):
     name = city["city_ascii"]
     catalog["addCity"] = city
-    mp.put(catalog["City"], name, city)
+    #mp.put(catalog["City"], name, city)
+    addtomap(catalog["City"], name, city)
 
 # Funciones para creacion de datos
 
@@ -129,7 +144,71 @@ def getData(catalog):
     resultado["ciudad"] = catalog["addCity"]
 
     return resultado
+##############################
 
+##### REQ 1 #####
+
+def Interconection(catalog):
+
+    digraph=catalog['routesDirigido']
+    Nodigraph=catalog['routesNodirigido']
+
+    Divertexs=graph.vertices(digraph)
+    NoDivertexs=graph.vertices(Nodigraph)
+
+    VMaxDi=lt.getElement(Divertexs,1)
+    VMaxDidegree=graph.outdegree(digraph,VMaxDi) + graph.indegree(digraph,VMaxDi)
+
+    for i in range(1,lt.size(Divertexs)+1):
+
+        Vertice=lt.getElement(Divertexs,i)
+        out=graph.outdegree(digraph,Vertice)
+        indeg=graph.indegree(digraph,Vertice)
+        degree=out+indeg
+
+        if degree >= VMaxDidegree:
+            VMaxDi=Vertice
+            VMaxDidegree=degree
+
+    listDi=lt.newList(datastructure='ARRAY_LIST')
+    lt.addLast(listDi,VMaxDi)
+
+    for i in range(1,lt.size(NoDivertexs)+1):
+        Vertice=lt.getElement(NoDivertexs,i)
+        degree=graph.degree(Nodigraph,Vertice)
+
+        if degree == VMaxDidegree:
+             lt.addLast(listDi,Vertice)
+
+####################################################
+
+    VMaxNoDi=lt.getElement(NoDivertexs,1)
+    VMaxNoDidegree=graph.degree(Nodigraph,VMaxNoDi)
+
+    for i in range(1,lt.size(NoDivertexs)+1):
+        Vertice=lt.getElement(NoDivertexs,i)
+        degree=graph.degree(Nodigraph,Vertice)
+
+        if degree == VMaxNoDidegree:
+            VMaxNoDi=Vertice
+            VMaxDidegree=degree
+
+    listNoDi=lt.newList(datastructure='ARRAY_LIST')
+    lt.addLast(listNoDi,VMaxNoDi)
+
+    for i in range(1,lt.size(NoDivertexs)+1):
+        Vertice=lt.getElement(NoDivertexs,i)
+        #degree=graph.degree(Nodigraph,Vertice)
+        out=graph.outdegree(digraph,Vertice)
+        indeg=graph.indegree(digraph,Vertice)
+        degree=out+indeg
+
+        if degree == VMaxNoDidegree:
+             lt.addLast(listNoDi,Vertice)
+
+    #print(listDi,listNoDi)
+
+    return listDi,listNoDi
 
 ##### REQ 2 #####
 
@@ -146,9 +225,9 @@ def findclust(catalog, IATA1, IATA2):
     return Components, Conect
 
     
-##### REQ 4 #####
+##### REQ 3 #####
 
-def traveller(catalog,milles,Departure):
+def t(catalog,milles,Departure):
 
 
     return
@@ -159,6 +238,7 @@ def traveller(catalog,milles,Departure):
 
     kms=float(milles)*1.6/2
 
+    mp.get(catalog['City'],Departure)
     search=djk.Dijkstra(catalog['routesNodirigido'],Departure)
 
     return
@@ -169,7 +249,15 @@ def traveller(catalog,milles,Departure):
 
 ##### REQ 6 #####
 
+#FUNCION AUXILIARES
 
+def distanceCord(Lat1,Lon1,Lat2,Lon2):
+
+    r=6371 
+    distanceP1 = math.sqrt(pow(math.sin((Lat2-Lat1)/2),2)  +  math.cos(Lat1)*math.cos(Lat2)*pow(math.sin((Lon2-Lon2)/2),2))
+    distanceF= 2*r*math.asin(distanceP1)
+    return distanceF
+    
 # Funciones utilizadas para comparar elementos dentro de una lista
 
 # Funciones de ordenamiento
