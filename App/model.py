@@ -25,6 +25,7 @@
  """
 
 import numpy 
+from prettytable import PrettyTable
 import math
 import config as cf
 from DISClib.ADT import list as lt
@@ -49,7 +50,8 @@ def NewCatalog():
                 "MapRoutes" : mp.newMap(50000,maptype="PROBING"),
                 "City": mp.newMap(41002,maptype="PROBING"),
                 "addCity" : None,
-                "MapGraph" : mp.newMap(10000,maptype="PROBING")
+                "MapGraph" : mp.newMap(10000,maptype="PROBING"),
+                "MapAirport_bycity" : mp.newMap(10000,maptype="PROBING"),
                 }
 
     return catalog
@@ -76,6 +78,8 @@ def addAirport(catalog, airport):
     name = airport["IATA"]
     if not mp.contains(a,name):
         mp.put(a, name, airport)
+
+    addtomap(catalog['MapAirport_bycity'],airport['City'],airport)
 
 def addRoute(catalog, route):
 
@@ -227,10 +231,27 @@ def findclust(catalog, IATA1, IATA2):
     
 ##### REQ 3 #####
 
-def t(catalog,milles,Departure):
+def Shortroute(catalog,Dp_City,Dt_city):
 
+    AirportsCity=me.getValue(mp.get(catalog['MapAirport_bycity'],Dp_City['city']))
+
+    m_airport=lt.getElement(AirportsCity,1)
+    m_distance=distanceCord(Dp_City['lat'],Dp_City['lng'],m_airport['Latitude'],m_airport['Longitude'])
+
+    for i in range(1,lt.size(AirportsCity)+1):
+
+        airport=lt.getElement(AirportsCity,i)
+        distance=distanceCord(Dp_City['lat'],Dp_City['lng'],airport['Latitude'],airport['Longitude'])
+        print('--',distance,airport)
+        if distance < m_distance:
+            m_distance = distance
+            m_airport = airport
+
+    print('\n1',m_distance,m_airport)
 
     return
+
+
 
 ##### REQ 4 #####
 
@@ -253,11 +274,20 @@ def traveller(catalog,milles,Departure):
 
 def distanceCord(Lat1,Lon1,Lat2,Lon2):
 
+    Lat1=float(Lat1)
+    Lon1=float(Lon1)
+    Lat2=float(Lat2)
+    Lon2=float(Lon2)
+
+    c = math.pi/180 #constante para transformar grados en radianes
     r=6371 
-    distanceP1 = math.sqrt(pow(math.sin((Lat2-Lat1)/2),2)  +  math.cos(Lat1)*math.cos(Lat2)*pow(math.sin((Lon2-Lon2)/2),2))
-    distanceF= 2*r*math.asin(distanceP1)
-    return distanceF
     
+    #distanceP1 = math.sqrt(pow(math.sin((Lat2-Lat1)/2),2)  +  math.cos(Lat1)*math.cos(Lat2)*pow(math.sin((Lon2-Lon1)/2),2))
+    #distanceF= 2*r*math.asin(distanceP1)
+
+    d=2*r*math.asin(math.sqrt(math.sin(c*(Lat2-Lat1)/2)**2 + math.cos(c*Lat1)*math.cos(c*Lat2)*math.sin(c*(Lon2-Lon1)/2)**2))
+    return d
+
 # Funciones utilizadas para comparar elementos dentro de una lista
 
 # Funciones de ordenamiento

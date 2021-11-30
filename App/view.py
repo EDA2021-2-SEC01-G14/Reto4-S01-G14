@@ -84,7 +84,6 @@ def printReq1(catalog,rta):
         TableNoDi.add_row([airport['IATA'],airport['Name'],airport['City'],airport['Country']])
     print(TableNoDi)
 
-
 def printReq2(rta):
 
     print('Hay',rta[0],'clústeres presentes en la red de transporte aéreo')
@@ -94,8 +93,22 @@ def printReq2(rta):
     else:
         print('Los dos aeropuertos no están en el mismo clúster')
 
+def ChooseCity(catalog,city):
 
+    Table = PrettyTable("N,Name,Country,SubRegion,Latitud,Longitud".split(","))
+    
+    city_Hom=me.getValue(mp.get(catalog['City'],city))
 
+    for i in range(1,lt.size(city_Hom)+1):    
+        eachCity=lt.getElement(city_Hom,i) 
+        Table.add_row([i,eachCity['city'],eachCity['country'],eachCity['admin_name'],
+        eachCity['lat'],eachCity['lng']])    
+
+    print(Table)
+
+    poscity=int(input('Del 1 al '+str(lt.size(city_Hom))+' escoja una ciudad: '))
+          
+    return lt.getElement(city_Hom,poscity)
 
 
 def printMenu():
@@ -150,9 +163,15 @@ def thread_cycle():
         
         elif int(inputs[0]) == 4:
 
-            DP=input('Ciudad origen: ')
-            DT=input('Ciudad detino: ')
+            Dp_City=input('Ciudad origen: ')
+            Dp_City=ChooseCity(catalog,Dp_City)
+            Dt_city=input('Ciudad detino: ')
+            Dt_city=ChooseCity(catalog,Dt_city)
 
+            print(Dp_City)
+            print(Dt_city)
+
+            controller.Shortroute(catalog,Dp_City,Dt_city)
 
             pass
         

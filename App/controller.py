@@ -55,6 +55,7 @@ def loadData(catalog):
 
 
 ##### REQ 1 #####
+
 def Interconection(catalog):
     return model.Interconection(catalog)
 
@@ -62,6 +63,11 @@ def Interconection(catalog):
 
 def findclust(catalog, IATA1, IATA2):
     return model.findclust(catalog, IATA1, IATA2)
+
+##### REQ 3 #####
+
+def Shortroute(catalog,Dp_City,Dt_city):
+    return model.Shortroute(catalog,Dp_City,Dt_city)
 
 # Funciones de ordenamiento
 
