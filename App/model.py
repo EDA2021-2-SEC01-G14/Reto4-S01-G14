@@ -29,6 +29,7 @@ from prettytable import PrettyTable
 import math
 import config as cf
 from DISClib.ADT import list as lt
+from DISClib.ADT import stack
 from DISClib.ADT import map as mp
 from DISClib.ADT import graph 
 from DISClib.Algorithms.Graphs import scc
@@ -93,17 +94,17 @@ def addRoute(catalog, route):
 
     if not mp.contains(catalog["MapRoutes"], (dp, dt)):
         if graph.containsVertex(route1, dp) and graph.containsVertex(route1, dt):
-            graph.addEdge(route1,dp, dt, route["distance_km"])
+            graph.addEdge(route1,dp, dt, float(route["distance_km"]))
         elif not graph.containsVertex(route1, dp) and not graph.containsVertex(route1, dt):
             graph.insertVertex(route1, dp)
             graph.insertVertex(route1, dt)
-            graph.addEdge(route1, dp, dt, route["distance_km"])
+            graph.addEdge(route1, dp, dt, float(route["distance_km"]))
         elif not graph.containsVertex(route1, dp):
             graph.insertVertex(route1, dp)
-            graph.addEdge(route1, dp, dt, route["distance_km"])
+            graph.addEdge(route1, dp, dt, float(route["distance_km"]))
         else:
             graph.insertVertex(route1, dt)
-            graph.addEdge(route1, dp, dt, route["distance_km"])
+            graph.addEdge(route1, dp, dt, float(route["distance_km"]))
         
         if catalog["AirportDirigido"] is None:
             catalog["AirportDirigido"] = dp
@@ -112,17 +113,17 @@ def addRoute(catalog, route):
     if mp.contains(catalog["MapRoutes"], (dt, dp)) and not mp.contains(catalog["MapGraph"], routes):
         
         if graph.containsVertex(route2, dp) and graph.containsVertex(route2, dt):
-            graph.addEdge(route2,dp, dt, route["distance_km"])
+            graph.addEdge(route2,dp, dt, float(route["distance_km"]))
         elif not graph.containsVertex(route2, dp) and not graph.containsVertex(route2, dt):
             graph.insertVertex(route2, dp)
             graph.insertVertex(route2, dt)
-            graph.addEdge(route2, dp, dt, route["distance_km"])
+            graph.addEdge(route2, dp, dt, float(route["distance_km"]))
         elif not graph.containsVertex(route2, dp):
             graph.insertVertex(route2, dp)
-            graph.addEdge(route2, dp, dt, route["distance_km"])
+            graph.addEdge(route2, dp, dt, float(route["distance_km"]))
         else:
             graph.insertVertex(route2, dt)
-            graph.addEdge(route2, dp, dt, route["distance_km"])
+            graph.addEdge(route2, dp, dt, float(route["distance_km"]))
         
         if catalog["Airport2"] is None:
             catalog["Airport2"] = dp
@@ -230,26 +231,49 @@ def findclust(catalog, IATA1, IATA2):
 
     
 ##### REQ 3 #####
+def closestAirport(catalog,city):
 
-def Shortroute(catalog,Dp_City,Dt_city):
-
-    AirportsCity=me.getValue(mp.get(catalog['MapAirport_bycity'],Dp_City['city']))
+    AirportsCity=me.getValue(mp.get(catalog['MapAirport_bycity'],city['city']))
 
     m_airport=lt.getElement(AirportsCity,1)
-    m_distance=distanceCord(Dp_City['lat'],Dp_City['lng'],m_airport['Latitude'],m_airport['Longitude'])
+    m_distance=distanceCord(city['lat'],city['lng'],m_airport['Latitude'],m_airport['Longitude'])
 
     for i in range(1,lt.size(AirportsCity)+1):
 
         airport=lt.getElement(AirportsCity,i)
-        distance=distanceCord(Dp_City['lat'],Dp_City['lng'],airport['Latitude'],airport['Longitude'])
-        print('--',distance,airport)
+        distance=distanceCord(city['lat'],city['lng'],airport['Latitude'],airport['Longitude'])
+        
         if distance < m_distance:
             m_distance = distance
             m_airport = airport
 
-    print('\n1',m_distance,m_airport)
 
-    return
+    return m_distance,m_airport
+
+
+def Shortroute(catalog,Dp_City,Dt_city):
+
+    airport_dp=closestAirport(catalog,Dp_City)
+
+    airport_dt=closestAirport(catalog,Dt_city)
+
+    search=djk.Dijkstra(catalog['routesNodirigido'],airport_dp[1]['IATA'])
+    path=djk.pathTo(search,airport_dt[1]['IATA'])
+
+
+    distance_aerea=0
+    for i in range(1,lt.size(path)+1):
+        distance_aerea += lt.getElement(path,i)['weight']
+
+    #print(path)
+
+    distance_terrestre = airport_dp[0]+airport_dt[0]
+
+    Tdistance=distance_aerea+distance_terrestre
+
+    return [Tdistance, path, airport_dp[1], airport_dt[1]]
+
+
 
 
 

@@ -109,6 +109,20 @@ def ChooseCity(catalog,city):
     poscity=int(input('Del 1 al '+str(lt.size(city_Hom))+' escoja una ciudad: '))
           
     return lt.getElement(city_Hom,poscity)
+def printReq3(rta):
+
+    print('\nEl Aeropuerto de Origen es: ',rta[2]['Name'],'('+rta[2]['IATA']+')')
+    print('El Aeropuerto de Destino es: ',rta[3]['Name'],'('+rta[3]['IATA']+')')
+
+    Table_route = PrettyTable("N°,Departure,Destination,distance_km".split(","))
+
+    path=rta[1]
+    for i in range(1,lt.size(path)+1):
+        route = lt.getElement(path,i)
+        Table_route.add_row([i,route['vertexA'],route['vertexB'],route['weight']])
+    print(Table_route)
+
+    print('La Distancia total de la ruta es: ',round(rta[0],4),'(Km)')
 
 
 def printMenu():
@@ -156,7 +170,6 @@ def thread_cycle():
             IATA2=input('Ingrese el Código IATA del aeropuerto 2: ')
 
             rta=controller.findclust(catalog, IATA1, IATA2)
-
             printReq2(rta)
 
             pass
@@ -168,10 +181,8 @@ def thread_cycle():
             Dt_city=input('Ciudad detino: ')
             Dt_city=ChooseCity(catalog,Dt_city)
 
-            print(Dp_City)
-            print(Dt_city)
-
-            controller.Shortroute(catalog,Dp_City,Dt_city)
+            rta=controller.Shortroute(catalog,Dp_City,Dt_city)
+            printReq3(rta)
 
             pass
         
