@@ -20,14 +20,18 @@
  * along withthis program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-
+#mport folium 
 import config as cf
 import sys
 import controller
+import threading
 from prettytable import PrettyTable
 from DISClib.ADT import list as lt
+from DISClib.ADT import map as mp
+from DISClib.DataStructures import mapentry as me
+from DISClib.ADT import graph 
+from DISClib.ADT import list as lt
 assert cf
-
 
 def printData(Catalogo):
 
@@ -56,8 +60,71 @@ def printData(Catalogo):
 
     print(printTable3)
 
+def printReq1(catalog,rta):
+
+    print('__________Digraph__________')
+    print('Número de aeropuertos mas interconectados:',lt.size(rta[0]))
+    print('el (los) aeropuerto(s) mas conexion (Digraph)')
+    TableDi = PrettyTable("IATA,Name,City,Country".split(","))
+    
+    for i in range(1,lt.size(rta[0])+1):
+        airport=lt.getElement(rta[0],i)
+        airport=me.getValue(mp.get(catalog['MapHelp'],airport))
+        TableDi.add_row([airport['IATA'],airport['Name'],airport['City'],airport['Country']])
+    print(TableDi)
+
+    print('__________NoDigraph__________')
+    print('Número de aeropuertos mas interconectados:',lt.size(rta[1]))
+    print('el (los) aeropuerto(s) mas conexion (NoDigraph)')
+    TableNoDi = PrettyTable("IATA,Name,City,Country".split(","))
+    for i in range(1,lt.size(rta[1])+1):
+        airport=lt.getElement(rta[1],i)
+        airport=me.getValue(mp.get(catalog['MapHelp'],airport))
+        TableNoDi.add_row([airport['IATA'],airport['Name'],airport['City'],airport['Country']])
+    print(TableNoDi)
+
+def printReq2(rta):
+
+    print('Hay',rta[0],'clústeres presentes en la red de transporte aéreo')
+
+    if rta[1] == True:
+        print('Los dos aeropuertos están en el mismo clúster')
+    else:
+        print('Los dos aeropuertos no están en el mismo clúster')
+
+def ChooseCity(catalog,city):
+
+    Table = PrettyTable("N,Name,Country,SubRegion,Latitud,Longitud".split(","))
+    
+    city_Hom=me.getValue(mp.get(catalog['City'],city))
+
+    for i in range(1,lt.size(city_Hom)+1):    
+        eachCity=lt.getElement(city_Hom,i) 
+        Table.add_row([i,eachCity['city'],eachCity['country'],eachCity['admin_name'],
+        eachCity['lat'],eachCity['lng']])    
+
+    print(Table)
+
+    poscity=int(input('Del 1 al '+str(lt.size(city_Hom))+' escoja una ciudad: '))
+          
+    return lt.getElement(city_Hom,poscity)
+def printReq3(rta):
+
+    print('\nEl Aeropuerto de Origen es: ',rta[2]['Name'],'('+rta[2]['IATA']+')')
+    print('El Aeropuerto de Destino es: ',rta[3]['Name'],'('+rta[3]['IATA']+')')
+
+    Table_route = PrettyTable("N°,Departure,Destination,distance_km".split(","))
+
+    path=rta[1]
+    for i in range(1,lt.size(path)+1):
+        route = lt.getElement(path,i)
+        Table_route.add_row([i,route['vertexA'],route['vertexB'],route['weight']])
+    print(Table_route)
+
+    print('La Distancia total de la ruta es: ',round(rta[0],4),'(Km)')
 
 def printMenu():
+    print("------------------------------------------------------")
     print("Bienvenido")
     print("1- Cargar información en el catálogo")
     print("2- Encontrar puntos de interconexión aérea")
@@ -68,48 +135,75 @@ def printMenu():
     print("7- Comparar con servicio WEB externo")
 
 
-
 catalog = None
 
 """
 Menu principal
 """
-while True:
-    printMenu()
-    inputs = input('Seleccione una opción para continuar\n')
+def thread_cycle():
+    while True:
+        printMenu()
+        inputs = input('Seleccione una opción para continuar\n')
 
-    if int(inputs[0]) == 1:
+        if int(inputs[0]) == 1:
 
-        print("Cargando información de los archivos ....")
-        catalog = controller.NewCatalog()
-        controller.loadData(catalog)
-        catalogo = controller.getData(catalog)
-        printData(catalogo)
+            print("Cargando información de los archivos ....")
+            catalog = controller.NewCatalog()
+            controller.loadData(catalog)
+            catalogo = controller.getData(catalog)
+            printData(catalogo)
+
+            #print(graph.degree(catalog['routesDirigido'],'AER'))
+            
+        elif int(inputs[0]) == 2:
+
+            rta=controller.Interconection(catalog)
+            printReq1(catalog,rta)
+            pass
+
+        elif int(inputs[0]) == 3:
+
+            IATA1=input('Ingrese el Código IATA del aeropuerto 1: ')
+            IATA2=input('Ingrese el Código IATA del aeropuerto 2: ')
+
+            rta=controller.findclust(catalog, IATA1, IATA2)
+            printReq2(rta)
+
+            pass
         
-    elif int(inputs[0]) == 2:
-        pass
+        elif int(inputs[0]) == 4:
 
-    elif int(inputs[0]) == 3:
-        pass
-    
-    elif int(inputs[0]) == 4:
-        pass
-    
-    elif int(inputs[0]) == 5:
-        pass
+            Dp_City=input('Ciudad origen: ')
+            Dp_City=ChooseCity(catalog,Dp_City)
+            Dt_city=input('Ciudad detino: ')
+            Dt_city=ChooseCity(catalog,Dt_city)
 
-    elif int(inputs[0]) == 6:
-        pass
-    
-    elif int(inputs[0]) == 7:
-        pass
+            rta=controller.Shortroute(catalog,Dp_City,Dt_city)
+            printReq3(rta)
 
-    elif int(inputs[0]) == 8:
-        pass
+            pass
+        
+        elif int(inputs[0]) == 5:
+            pass
 
-    elif int(inputs[0]) == 9:
-        pass
+        elif int(inputs[0]) == 6:
+            pass
+        
+        elif int(inputs[0]) == 7:
+            pass
 
-    else:
-        sys.exit(0)
-sys.exit(0)
+        elif int(inputs[0]) == 8:
+            pass
+
+        elif int(inputs[0]) == 9:
+            pass
+
+        else:
+            sys.exit(0)
+    sys.exit(0)
+
+if __name__ == "__main__":
+    threading.stack_size(67108864)  # 64MB stack
+    sys.setrecursionlimit(2 ** 20)
+    thread = threading.Thread(target=thread_cycle)
+    thread.start()

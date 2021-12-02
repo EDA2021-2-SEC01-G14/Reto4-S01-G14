@@ -24,11 +24,16 @@
  * Dario Correal - Version inicial
  """
 
-
+import numpy 
+from prettytable import PrettyTable
+import math
 import config as cf
 from DISClib.ADT import list as lt
+from DISClib.ADT import stack
 from DISClib.ADT import map as mp
 from DISClib.ADT import graph 
+from DISClib.Algorithms.Graphs import scc
+from DISClib.Algorithms.Graphs import dijsktra as djk
 from DISClib.DataStructures import mapentry as me
 from DISClib.Algorithms.Sorting import shellsort as sa
 assert cf
@@ -40,20 +45,33 @@ def NewCatalog():
 
     catalog = { "AirportDirigido" : None,
                 "Airport2" : None,
-                "routesDirigido" : graph.newGraph(directed=True, size=10000),
+                "routesDirigido": graph.newGraph(directed=True, size=10000),
                 "routesNodirigido": graph.newGraph(size=3000),
                 "MapHelp" : mp.newMap(10000,maptype="PROBING"),
                 "MapRoutes" : mp.newMap(50000,maptype="PROBING"),
                 "City": mp.newMap(41002,maptype="PROBING"),
                 "addCity" : None,
-                "MapGraph" : mp.newMap(10000,maptype="PROBING")
-                
-
-    }
+                "MapGraph" : mp.newMap(10000,maptype="PROBING"),
+                "MapAirport_bycity" : mp.newMap(10000,maptype="PROBING"),
+                }
 
     return catalog
 
 # Funciones para agregar informacion al catalogo
+def addtomap(map,key,object):
+
+    if mp.contains(map,key):
+    
+            entry=mp.get(map,key)
+            list=entry['value']
+            lt.addLast(list,object)
+            mp.put(map,key,list)
+            #print(mp.get(catalog['BeginDate'],artist['BeginDate']))
+            
+    else: 
+        list=lt.newList(datastructure='ARRAY_LIST')
+        lt.addLast(list,object)
+        mp.put(map,key,list)
 
 def addAirport(catalog, airport):
 
@@ -62,6 +80,7 @@ def addAirport(catalog, airport):
     if not mp.contains(a,name):
         mp.put(a, name, airport)
 
+    addtomap(catalog['MapAirport_bycity'],airport['City'],airport)
 
 def addRoute(catalog, route):
 
@@ -75,17 +94,17 @@ def addRoute(catalog, route):
 
     if not mp.contains(catalog["MapRoutes"], (dp, dt)):
         if graph.containsVertex(route1, dp) and graph.containsVertex(route1, dt):
-            graph.addEdge(route1,dp, dt, route["distance_km"])
+            graph.addEdge(route1,dp, dt, float(route["distance_km"]))
         elif not graph.containsVertex(route1, dp) and not graph.containsVertex(route1, dt):
             graph.insertVertex(route1, dp)
             graph.insertVertex(route1, dt)
-            graph.addEdge(route1, dp, dt, route["distance_km"])
+            graph.addEdge(route1, dp, dt, float(route["distance_km"]))
         elif not graph.containsVertex(route1, dp):
             graph.insertVertex(route1, dp)
-            graph.addEdge(route1, dp, dt, route["distance_km"])
+            graph.addEdge(route1, dp, dt, float(route["distance_km"]))
         else:
             graph.insertVertex(route1, dt)
-            graph.addEdge(route1, dp, dt, route["distance_km"])
+            graph.addEdge(route1, dp, dt, float(route["distance_km"]))
         
         if catalog["AirportDirigido"] is None:
             catalog["AirportDirigido"] = dp
@@ -94,17 +113,17 @@ def addRoute(catalog, route):
     if mp.contains(catalog["MapRoutes"], (dt, dp)) and not mp.contains(catalog["MapGraph"], routes):
         
         if graph.containsVertex(route2, dp) and graph.containsVertex(route2, dt):
-            graph.addEdge(route2,dp, dt, route["distance_km"])
+            graph.addEdge(route2,dp, dt, float(route["distance_km"]))
         elif not graph.containsVertex(route2, dp) and not graph.containsVertex(route2, dt):
             graph.insertVertex(route2, dp)
             graph.insertVertex(route2, dt)
-            graph.addEdge(route2, dp, dt, route["distance_km"])
+            graph.addEdge(route2, dp, dt, float(route["distance_km"]))
         elif not graph.containsVertex(route2, dp):
             graph.insertVertex(route2, dp)
-            graph.addEdge(route2, dp, dt, route["distance_km"])
+            graph.addEdge(route2, dp, dt, float(route["distance_km"]))
         else:
             graph.insertVertex(route2, dt)
-            graph.addEdge(route2, dp, dt, route["distance_km"])
+            graph.addEdge(route2, dp, dt, float(route["distance_km"]))
         
         if catalog["Airport2"] is None:
             catalog["Airport2"] = dp
@@ -113,7 +132,8 @@ def addRoute(catalog, route):
 def addCity(catalog, city):
     name = city["city_ascii"]
     catalog["addCity"] = city
-    mp.put(catalog["City"], name, city)
+    #mp.put(catalog["City"], name, city)
+    addtomap(catalog["City"], name, city)
 
 # Funciones para creacion de datos
 
@@ -126,9 +146,178 @@ def getData(catalog):
     resultado["aeropuertos1"] =lt.size(graph.vertices(catalog["routesDirigido"]))
     resultado["aeropuertos2"] =  lt.size(graph.vertices(catalog["routesNodirigido"]))
     resultado["ciudades"]=mp.size(catalog["City"])
-    resultado["ciudad"] =catalog["addCity"]
+    resultado["ciudad"] = catalog["addCity"]
 
     return resultado
+##############################
+
+##### REQ 1 #####
+
+def Interconection(catalog):
+
+    digraph=catalog['routesDirigido']
+    Nodigraph=catalog['routesNodirigido']
+
+    Divertexs=graph.vertices(digraph)
+    NoDivertexs=graph.vertices(Nodigraph)
+
+    VMaxDi=lt.getElement(Divertexs,1)
+    VMaxDidegree=graph.outdegree(digraph,VMaxDi) + graph.indegree(digraph,VMaxDi)
+
+    for i in range(1,lt.size(Divertexs)+1):
+
+        Vertice=lt.getElement(Divertexs,i)
+        out=graph.outdegree(digraph,Vertice)
+        indeg=graph.indegree(digraph,Vertice)
+        degree=out+indeg
+
+        if degree >= VMaxDidegree:
+            VMaxDi=Vertice
+            VMaxDidegree=degree
+
+    listDi=lt.newList(datastructure='ARRAY_LIST')
+    lt.addLast(listDi,VMaxDi)
+
+    for i in range(1,lt.size(NoDivertexs)+1):
+        Vertice=lt.getElement(NoDivertexs,i)
+        out=graph.outdegree(digraph,Vertice)
+        indeg=graph.indegree(digraph,Vertice)
+        degree=out+indeg
+
+        if degree == VMaxDidegree:
+            if lt.isPresent(listDi,Vertice) == 0:
+                lt.addLast(listDi,Vertice)
+
+####################################################
+
+    VMaxNoDi=lt.getElement(NoDivertexs,1)
+    VMaxNoDidegree=graph.degree(Nodigraph,VMaxNoDi)
+
+    for i in range(1,lt.size(NoDivertexs)+1):
+        Vertice=lt.getElement(NoDivertexs,i)
+        #degree=graph.degree(Nodigraph,Vertice)
+        out=graph.outdegree(digraph,Vertice)
+        indeg=graph.indegree(digraph,Vertice)
+        degree=out+indeg
+
+        if degree >= VMaxNoDidegree:
+            VMaxNoDi=Vertice
+            VMaxDidegree=degree
+
+    listNoDi=lt.newList(datastructure='ARRAY_LIST')
+    lt.addLast(listNoDi,VMaxNoDi)
+
+    for i in range(1,lt.size(NoDivertexs)+1):
+        Vertice=lt.getElement(NoDivertexs,i)
+        #degree=graph.degree(Nodigraph,Vertice)
+        out=graph.outdegree(digraph,Vertice)
+        indeg=graph.indegree(digraph,Vertice)
+        degree=out+indeg
+
+        if degree == VMaxNoDidegree:
+            if lt.isPresent(listNoDi,Vertice) == 0:
+                lt.addLast(listNoDi,Vertice)
+
+    #print(listDi,listNoDi)
+
+    return listDi,listNoDi
+
+##### REQ 2 #####
+
+def findclust(catalog, IATA1, IATA2):
+
+    catalog['routesDirigido']
+
+    SCC = scc.KosarajuSCC(catalog['routesDirigido'])
+
+    Components=scc.connectedComponents(SCC)
+   
+    Conect=scc.stronglyConnected(SCC,IATA1,IATA2)
+
+    return Components, Conect
+
+    
+##### REQ 3 #####
+def closestAirport(catalog,city):
+
+    AirportsCity=me.getValue(mp.get(catalog['MapAirport_bycity'],city['city']))
+
+    m_airport=lt.getElement(AirportsCity,1)
+    m_distance=distanceCord(city['lat'],city['lng'],m_airport['Latitude'],m_airport['Longitude'])
+
+    for i in range(1,lt.size(AirportsCity)+1):
+
+        airport=lt.getElement(AirportsCity,i)
+        distance=distanceCord(city['lat'],city['lng'],airport['Latitude'],airport['Longitude'])
+        
+        if distance < m_distance:
+            m_distance = distance
+            m_airport = airport
+
+
+    return m_distance,m_airport
+
+
+def Shortroute(catalog,Dp_City,Dt_city):
+
+    airport_dp=closestAirport(catalog,Dp_City)
+
+    airport_dt=closestAirport(catalog,Dt_city)
+
+    search=djk.Dijkstra(catalog['routesNodirigido'],airport_dp[1]['IATA'])
+    path=djk.pathTo(search,airport_dt[1]['IATA'])
+
+
+    distance_aerea=0
+    for i in range(1,lt.size(path)+1):
+        distance_aerea += lt.getElement(path,i)['weight']
+
+    #print(path)
+
+    distance_terrestre = airport_dp[0]+airport_dt[0]
+
+    Tdistance=distance_aerea+distance_terrestre
+
+    return [Tdistance, path, airport_dp[1], airport_dt[1]]
+
+
+
+
+
+##### REQ 4 #####
+
+def traveller(catalog,milles,Departure):
+
+    kms=float(milles)*1.6/2
+
+    mp.get(catalog['City'],Departure)
+    search=djk.Dijkstra(catalog['routesNodirigido'],Departure)
+
+    return
+
+##### REQ 5 #####
+
+
+
+##### REQ 6 #####
+
+#FUNCION AUXILIARES
+
+def distanceCord(Lat1,Lon1,Lat2,Lon2):
+
+    Lat1=float(Lat1)
+    Lon1=float(Lon1)
+    Lat2=float(Lat2)
+    Lon2=float(Lon2)
+
+    c = math.pi/180 #constante para transformar grados en radianes
+    r=6371 
+    
+    #distanceP1 = math.sqrt(pow(math.sin((Lat2-Lat1)/2),2)  +  math.cos(Lat1)*math.cos(Lat2)*pow(math.sin((Lon2-Lon1)/2),2))
+    #distanceF= 2*r*math.asin(distanceP1)
+
+    d=2*r*math.asin(math.sqrt(math.sin(c*(Lat2-Lat1)/2)**2 + math.cos(c*Lat1)*math.cos(c*Lat2)*math.sin(c*(Lon2-Lon1)/2)**2))
+    return d
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 

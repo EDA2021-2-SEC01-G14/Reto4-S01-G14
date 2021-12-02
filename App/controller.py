@@ -24,7 +24,6 @@ import config as cf
 import model
 import csv
 
-
 # Inicialización del Catálogo de libros
 
 def NewCatalog():
@@ -40,7 +39,6 @@ def loadData(catalog):
     for airport in airports:
         model.addAirport(catalog, airport)
 
-
     file = cf.data_dir + "routes_full.csv"
     routes = csv.DictReader(open(file, encoding="utf-8"), delimiter=",")
 
@@ -53,6 +51,20 @@ def loadData(catalog):
     for city in cities:
         model.addCity(catalog, city)
 
+##### REQ 1 #####
+
+def Interconection(catalog):
+    return model.Interconection(catalog)
+
+##### REQ 2 #####
+
+def findclust(catalog, IATA1, IATA2):
+    return model.findclust(catalog, IATA1, IATA2)
+
+##### REQ 3 #####
+
+def Shortroute(catalog,Dp_City,Dt_city):
+    return model.Shortroute(catalog,Dp_City,Dt_city)
 
 # Funciones de ordenamiento
 
