@@ -223,7 +223,8 @@ def findclust(catalog, IATA1, IATA2):
 ##### REQ 3 #####
 def closestAirport(catalog,city):
 
-    AirportsCity=me.getValue(mp.get(catalog['MapAirport_bycity'],city['city']))
+
+    AirportsCity=me.getValue(mp.get(catalog['MapAirport_bycity'],city['city_ascii']))
 
     m_airport=lt.getElement(AirportsCity,1)
     m_distance=distanceCord(city['lat'],city['lng'],m_airport['Latitude'],m_airport['Longitude'])
@@ -252,6 +253,7 @@ def Shortroute(catalog,Dp_City,Dt_city):
 
 
     distance_aerea=0
+    print(path)
     for i in range(1,lt.size(path)+1):
         distance_aerea += lt.getElement(path,i)['weight']
 

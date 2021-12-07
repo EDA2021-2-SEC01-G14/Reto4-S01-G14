@@ -99,7 +99,7 @@ def ChooseCity(catalog,city):
     poscity=int(input('Del 1 al '+str(lt.size(city_Hom))+' escoja una ciudad: '))
           
     return lt.getElement(city_Hom,poscity)
-def printReq3(rta):
+def printReq3(catalog,rta):
 
     print('\nEl Aeropuerto de Origen es: ',rta[2]['Name'],'('+rta[2]['IATA']+')')
     print('El Aeropuerto de Destino es: ',rta[3]['Name'],'('+rta[3]['IATA']+')')
@@ -109,7 +109,9 @@ def printReq3(rta):
     path=rta[1]
     for i in range(1,lt.size(path)+1):
         route = lt.getElement(path,i)
-        Table_route.add_row([i,route['vertexA'],route['vertexB'],route['weight']])
+        airport1=me.getValue(mp.get(catalog['MapHelp'],route['vertexA']))['Name']
+        airport2=me.getValue(mp.get(catalog['MapHelp'],route['vertexB']))['Name']
+        Table_route.add_row([i,airport1+':('+route['vertexA']+')',airport2+':('+route['vertexB']+')',route['weight']])
     print(Table_route)
 
     print('La Distancia total de la ruta es: ',round(rta[0],4),'(Km)')
@@ -172,7 +174,7 @@ def thread_cycle():
             Dt_city=ChooseCity(catalog,Dt_city)
 
             rta=controller.Shortroute(catalog,Dp_City,Dt_city)
-            printReq3(rta)
+            printReq3(catalog,rta)
 
             pass
         

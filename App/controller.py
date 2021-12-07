@@ -36,20 +36,20 @@ def loadData(catalog):
 
 
     #airports-utf8-small.csv
-    file = cf.data_dir + "airports_full.csv"
+    file = cf.data_dir + "airports-utf8-small.csv"
     airports = csv.DictReader(open(file, encoding="utf-8"), delimiter=",")
 
     for airport in airports:
         model.addAirport(catalog, airport)
 
 
-    file = cf.data_dir + "routes_full.csv"
+    file = cf.data_dir + "routes-utf8-small.csv"
     routes = csv.DictReader(open(file, encoding="utf-8"), delimiter=",")
 
     for route in routes:
         model.addRoute(catalog, route)
 
-    file = cf.data_dir + "worldcities.csv"
+    file = cf.data_dir + "worldcities-utf8.csv"
     cities = csv.DictReader(open(file, encoding="utf-8"), delimiter=",")
 
     for city in cities:
