@@ -62,27 +62,17 @@ def printData(Catalogo):
     print(printTable3)
 
 def printReq1(catalog,rta):
-
-    print('__________Digraph__________')
-    print('Número de aeropuertos mas interconectados:',lt.size(rta[0]))
-    print('el (los) aeropuerto(s) mas conexion (Digraph)')
-    TableDi = PrettyTable("IATA,Name,City,Country".split(","))
+ 
+    TableDi = PrettyTable("IATA,Name,City,Country,Bonds".split(","))
     
-    for i in range(1,lt.size(rta[0])+1):
-        airport=lt.getElement(rta[0],i)
-        airport=me.getValue(mp.get(catalog['MapHelp'],airport))
-        TableDi.add_row([airport['IATA'],airport['Name'],airport['City'],airport['Country']])
+    for i in range(1,lt.size(rta)+1):
+        if i <= 5:
+            airportT=lt.getElement(rta,i)
+            airport=me.getValue(mp.get(catalog['MapHelp'],airportT[0]))
+            TableDi.add_row([airport['IATA'],airport['Name'],airport['City'],airport['Country'],airportT[1]])   
+        
     print(TableDi)
 
-    print('__________NoDigraph__________')
-    print('Número de aeropuertos mas interconectados:',lt.size(rta[1]))
-    print('el (los) aeropuerto(s) mas conexion (NoDigraph)')
-    TableNoDi = PrettyTable("IATA,Name,City,Country".split(","))
-    for i in range(1,lt.size(rta[1])+1):
-        airport=lt.getElement(rta[1],i)
-        airport=me.getValue(mp.get(catalog['MapHelp'],airport))
-        TableNoDi.add_row([airport['IATA'],airport['Name'],airport['City'],airport['Country']])
-    print(TableNoDi)
 
 def printReq2(rta):
 

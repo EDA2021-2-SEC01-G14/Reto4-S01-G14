@@ -34,6 +34,8 @@ def NewCatalog():
 
 def loadData(catalog):
 
+
+    #airports-utf8-small.csv
     file = cf.data_dir + "airports_full.csv"
     airports = csv.DictReader(open(file, encoding="utf-8"), delimiter=",")
 
