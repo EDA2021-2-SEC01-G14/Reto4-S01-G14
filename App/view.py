@@ -30,7 +30,8 @@ from prettytable import PrettyTable
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
 from DISClib.DataStructures import mapentry as me
-from DISClib.ADT import graph 
+from DISClib.ADT import graph
+import time
 from DISClib.ADT import list as lt
 assert cf
 
@@ -173,26 +174,33 @@ def thread_cycle():
         if int(inputs[0]) == 1:
 
             print("Cargando información de los archivos ....")
+            start = time.process_time()
             catalog = controller.NewCatalog()
             controller.loadData(catalog)
             catalogo = controller.getData(catalog)
+            stop = time.process_time()
+            print("Tiempo: "+ str(stop-start))
             printData(catalogo)
 
             #print(graph.degree(catalog['routesDirigido'],'AER'))
             
         elif int(inputs[0]) == 2:
-
+            start = time.process_time()
             rta=controller.Interconection(catalog)
             printReq1(catalog,rta)
+            stop = time.process_time()
+            print("Tiempo: "+ str(stop-start))
             pass
 
         elif int(inputs[0]) == 3:
 
             IATA1=input('Ingrese el Código IATA del aeropuerto 1: ')
             IATA2=input('Ingrese el Código IATA del aeropuerto 2: ')
-
+            start = time.process_time()
             rta=controller.findclust(catalog, IATA1, IATA2)
             printReq2(rta)
+            stop = time.process_time()
+            print("Tiempo: "+ str(stop-start))
 
             pass
         
@@ -202,9 +210,11 @@ def thread_cycle():
             Dp_City=ChooseCity(catalog,Dp_City)
             Dt_city=input('Ciudad detino: ')
             Dt_city=ChooseCity(catalog,Dt_city)
-
+            start = time.process_time()
             rta=controller.Shortroute(catalog,Dp_City,Dt_city)
             printReq3(rta)
+            stop = time.process_time()
+            print("Tiempo: "+ str(stop-start))
 
             pass
         
@@ -216,9 +226,11 @@ def thread_cycle():
         elif int(inputs[0]) == 6:
 
             aeropuerto = input("Ingrese el codigo IATA del aeropuerto: ")
-        
+            start = time.process_time()
             result = controller.CloseAir(catalog,aeropuerto)
             printReq5(catalog,result)
+            stop = time.process_time()
+            print("Tiempo: "+ str(stop-start))
         
         
         elif int(inputs[0]) == 7:
