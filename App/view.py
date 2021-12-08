@@ -21,6 +21,7 @@
 """
 
 #mport folium 
+import prettytable
 import config as cf
 import sys
 import controller
@@ -123,6 +124,30 @@ def printReq3(rta):
 
     print('La Distancia total de la ruta es: ',round(rta[0],4),'(Km)')
 
+
+def printReq5(catalog,result):
+    print("El numero total de aeropuertos afectados es de " + str(result[2]))
+    pret1 = PrettyTable(["Num","IATA", "Name", "City","Country" ,"Tipo"])
+    pret1.hrules = prettytable.ALL
+    i = 1
+    for aeropuerto in lt.iterator(result[0]):
+        a = [i]
+        for key in pret1.field_names[1:-1]:
+            a.append(me.getValue(mp.get(catalog["MapHelp"],aeropuerto))[key])
+        a.append("Origen")
+        pret1.add_row(a)
+        i+=1
+        
+    for airD in lt.iterator(result[1]):
+        a = [i]
+        for key in pret1.field_names[1:-1]:
+            a.append(me.getValue(mp.get(catalog["MapHelp"],airD))[key])
+        a.append("Destino")
+        pret1.add_row(a)
+        i+=1
+    
+    print(pret1)
+
 def printMenu():
     print("------------------------------------------------------")
     print("Bienvenido")
@@ -184,10 +209,17 @@ def thread_cycle():
             pass
         
         elif int(inputs[0]) == 5:
+
             pass
 
+        
         elif int(inputs[0]) == 6:
-            pass
+
+            aeropuerto = input("Ingrese el codigo IATA del aeropuerto: ")
+        
+            result = controller.CloseAir(catalog,aeropuerto)
+            printReq5(catalog,result)
+        
         
         elif int(inputs[0]) == 7:
             pass

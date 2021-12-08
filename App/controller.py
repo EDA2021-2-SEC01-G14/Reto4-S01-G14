@@ -66,6 +66,11 @@ def findclust(catalog, IATA1, IATA2):
 def Shortroute(catalog,Dp_City,Dt_city):
     return model.Shortroute(catalog,Dp_City,Dt_city)
 
+##### REQ 5 #####
+
+def CloseAir(catalog, aeropuerto):
+    return model.CloseAir(catalog, aeropuerto)
+
 # Funciones de ordenamiento
 
 # Funciones de consulta sobre el catálogo

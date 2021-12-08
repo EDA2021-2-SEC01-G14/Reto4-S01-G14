@@ -34,6 +34,7 @@ from DISClib.ADT import map as mp
 from DISClib.ADT import graph 
 from DISClib.Algorithms.Graphs import scc
 from DISClib.Algorithms.Graphs import dijsktra as djk
+from DISClib.Algorithms.Graphs import scc,dijsktra, prim, bfs
 from DISClib.DataStructures import mapentry as me
 from DISClib.Algorithms.Sorting import shellsort as sa
 assert cf
@@ -53,6 +54,7 @@ def NewCatalog():
                 "addCity" : None,
                 "MapGraph" : mp.newMap(10000,maptype="PROBING"),
                 "MapAirport_bycity" : mp.newMap(10000,maptype="PROBING"),
+                
                 }
 
     return catalog
@@ -132,7 +134,7 @@ def addRoute(catalog, route):
 def addCity(catalog, city):
     name = city["city_ascii"]
     catalog["addCity"] = city
-    #mp.put(catalog["City"], name, city)
+
     addtomap(catalog["City"], name, city)
 
 # Funciones para creacion de datos
@@ -286,20 +288,33 @@ def Shortroute(catalog,Dp_City,Dt_city):
 
 ##### REQ 4 #####
 
-def traveller(catalog,milles,Departure):
-
-    kms=float(milles)*1.6/2
-
-    mp.get(catalog['City'],Departure)
-    search=djk.Dijkstra(catalog['routesNodirigido'],Departure)
-
-    return
 
 ##### REQ 5 #####
+
+def CloseAir(catalog, aeropuerto):
+
+    a1 = catalog["routesDirigido"]
+    
+    origen = lt.newList("ARRAY_LIST")
+    destino = lt.newList("ARRAY_LIST")
+    for uno in lt.iterator(graph.vertices(a1)):
+        if uno == aeropuerto:
+            adj = graph.adjacents(a1, uno)
+            for i in lt.iterator(adj):
+                lt.addLast(origen, i)
+        else:
+            adj = graph.adjacents(a1,uno)
+            if lt.isPresent(adj, aeropuerto):
+                lt.addLast(destino, uno)
+
+    suma = lt.size(destino)+lt.size(origen)
+
+    return destino, origen, suma
 
 
 
 ##### REQ 6 #####
+
 
 #FUNCION AUXILIARES
 
