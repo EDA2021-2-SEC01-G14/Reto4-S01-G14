@@ -22,6 +22,7 @@
 
 #mport folium 
 import prettytable
+import time
 import config as cf
 import sys
 import controller
@@ -30,8 +31,7 @@ from prettytable import PrettyTable
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
 from DISClib.DataStructures import mapentry as me
-from DISClib.ADT import graph
-import time
+from DISClib.ADT import graph 
 from DISClib.ADT import list as lt
 assert cf
 
@@ -63,27 +63,16 @@ def printData(Catalogo):
     print(printTable3)
 
 def printReq1(catalog,rta):
-
-    print('__________Digraph__________')
-    print('Número de aeropuertos mas interconectados:',lt.size(rta[0]))
-    print('el (los) aeropuerto(s) mas conexion (Digraph)')
-    TableDi = PrettyTable("IATA,Name,City,Country".split(","))
+ 
+    TableDi = PrettyTable("IATA,Name,City,Country,Bonds".split(","))
     
-    for i in range(1,lt.size(rta[0])+1):
-        airport=lt.getElement(rta[0],i)
-        airport=me.getValue(mp.get(catalog['MapHelp'],airport))
-        TableDi.add_row([airport['IATA'],airport['Name'],airport['City'],airport['Country']])
+    for i in range(1,lt.size(rta)+1):
+        if i <= 5:
+            airportT=lt.getElement(rta,i)
+            airport=me.getValue(mp.get(catalog['MapHelp'],airportT[0]))
+            TableDi.add_row([airport['IATA'],airport['Name'],airport['City'],airport['Country'],airportT[1]])   
+        
     print(TableDi)
-
-    print('__________NoDigraph__________')
-    print('Número de aeropuertos mas interconectados:',lt.size(rta[1]))
-    print('el (los) aeropuerto(s) mas conexion (NoDigraph)')
-    TableNoDi = PrettyTable("IATA,Name,City,Country".split(","))
-    for i in range(1,lt.size(rta[1])+1):
-        airport=lt.getElement(rta[1],i)
-        airport=me.getValue(mp.get(catalog['MapHelp'],airport))
-        TableNoDi.add_row([airport['IATA'],airport['Name'],airport['City'],airport['Country']])
-    print(TableNoDi)
 
 def printReq2(rta):
 
@@ -110,7 +99,7 @@ def ChooseCity(catalog,city):
     poscity=int(input('Del 1 al '+str(lt.size(city_Hom))+' escoja una ciudad: '))
           
     return lt.getElement(city_Hom,poscity)
-def printReq3(rta):
+def printReq3(catalog,rta):
 
     print('\nEl Aeropuerto de Origen es: ',rta[2]['Name'],'('+rta[2]['IATA']+')')
     print('El Aeropuerto de Destino es: ',rta[3]['Name'],'('+rta[3]['IATA']+')')
@@ -120,11 +109,12 @@ def printReq3(rta):
     path=rta[1]
     for i in range(1,lt.size(path)+1):
         route = lt.getElement(path,i)
-        Table_route.add_row([i,route['vertexA'],route['vertexB'],route['weight']])
+        airport1=me.getValue(mp.get(catalog['MapHelp'],route['vertexA']))['Name']
+        airport2=me.getValue(mp.get(catalog['MapHelp'],route['vertexB']))['Name']
+        Table_route.add_row([i,airport1+':('+route['vertexA']+')',airport2+':('+route['vertexB']+')',route['weight']])
     print(Table_route)
 
     print('La Distancia total de la ruta es: ',round(rta[0],4),'(Km)')
-
 
 def printReq5(catalog,result):
     print("El numero total de aeropuertos afectados es de " + str(result[2]))
@@ -149,6 +139,7 @@ def printReq5(catalog,result):
     
     print(pret1)
 
+
 def printMenu():
     print("------------------------------------------------------")
     print("Bienvenido")
@@ -159,7 +150,6 @@ def printMenu():
     print("5- Utilizar las millas de viajero")
     print("6- Cuantificar el efecto de un aeropuerto cerrado")
     print("7- Comparar con servicio WEB externo")
-
 
 catalog = None
 
@@ -174,55 +164,70 @@ def thread_cycle():
         if int(inputs[0]) == 1:
 
             print("Cargando información de los archivos ....")
-            start = time.process_time()
+
+            start = time.process_time_ns()
+
             catalog = controller.NewCatalog()
             controller.loadData(catalog)
             catalogo = controller.getData(catalog)
-            stop = time.process_time()
-            print("Tiempo: "+ str(stop-start))
             printData(catalogo)
+
+            stop = time.process_time_ns()
+            sgs = (stop-start)/1000000000
+            print('Time',sgs)
 
             #print(graph.degree(catalog['routesDirigido'],'AER'))
             
         elif int(inputs[0]) == 2:
-            start = time.process_time()
+
+            start = time.process_time_ns()
+
             rta=controller.Interconection(catalog)
             printReq1(catalog,rta)
-            stop = time.process_time()
-            print("Tiempo: "+ str(stop-start))
+
+            stop = time.process_time_ns()
+            sgs = (stop-start)/1000000000
+            print('Time',sgs) 
             pass
 
         elif int(inputs[0]) == 3:
 
             IATA1=input('Ingrese el Código IATA del aeropuerto 1: ')
             IATA2=input('Ingrese el Código IATA del aeropuerto 2: ')
-            start = time.process_time()
+
+            start = time.process_time_ns()
+
             rta=controller.findclust(catalog, IATA1, IATA2)
             printReq2(rta)
-            stop = time.process_time()
-            print("Tiempo: "+ str(stop-start))
 
+            stop = time.process_time_ns()
+            sgs = (stop-start)/1000000000
+            print('Time',sgs) 
             pass
         
         elif int(inputs[0]) == 4:
+
+            
 
             Dp_City=input('Ciudad origen: ')
             Dp_City=ChooseCity(catalog,Dp_City)
             Dt_city=input('Ciudad detino: ')
             Dt_city=ChooseCity(catalog,Dt_city)
-            start = time.process_time()
-            rta=controller.Shortroute(catalog,Dp_City,Dt_city)
-            printReq3(rta)
-            stop = time.process_time()
-            print("Tiempo: "+ str(stop-start))
 
+            start = time.process_time_ns()
+
+            rta=controller.Shortroute(catalog,Dp_City,Dt_city)
+            printReq3(catalog,rta)
+
+
+            stop = time.process_time_ns()
+            sgs = (stop-start)/1000000000
+            print('Time',sgs) 
             pass
         
         elif int(inputs[0]) == 5:
-
             pass
 
-        
         elif int(inputs[0]) == 6:
 
             aeropuerto = input("Ingrese el codigo IATA del aeropuerto: ")
@@ -231,7 +236,7 @@ def thread_cycle():
             printReq5(catalog,result)
             stop = time.process_time()
             print("Tiempo: "+ str(stop-start))
-        
+
         
         elif int(inputs[0]) == 7:
             pass
@@ -251,3 +256,4 @@ if __name__ == "__main__":
     sys.setrecursionlimit(2 ** 20)
     thread = threading.Thread(target=thread_cycle)
     thread.start()
+
